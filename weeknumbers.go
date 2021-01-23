@@ -1,47 +1,48 @@
-package weeknumbers
+package main
 
 import (
-	"fmt"
 	"time"
 )
 
 const Day = time.Hour * 24
 
-func Hello() {
-	fmt.Println("Hello, World!")
-}
-
 type Week struct {
-	Start time.Time
-	End   time.Time
+	Number int
+	Start  time.Time
+	End    time.Time
 }
 
-func NewWeek(start, end time.Time) *Week {
+func NewWeek(number int, start, end time.Time) *Week {
 	return &Week{
-		Start: start,
-		End:   end,
+		Number: number,
+		Start:  start,
+		End:    end,
 	}
 }
 
 func AllWeeks(year int) []*Week {
 
 	start := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
-
 	weeks := make([]*Week, 0)
+	weekNumber := 0
 
-	// Handle week 0
+	// Not all years have a week 0
 	if start.Weekday() == time.Monday {
-		weeks = append(weeks, nil)
+		weekNumber++
 	}
 
 	for true {
 		next := addDays(start, mondayOffset(start))
-		weeks = append(weeks, NewWeek(start, addDays(next, -1)))
+		end := addDays(next, -1)
+
+		week := NewWeek(weekNumber, start, end)
+		weeks = append(weeks, week)
 
 		if next.Year() != year {
 			break
 		}
 		start = next
+		weekNumber++
 	}
 
 	return weeks
