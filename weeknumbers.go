@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -18,6 +19,10 @@ func NewWeek(number int, start, end time.Time) *Week {
 		Start:  start,
 		End:    end,
 	}
+}
+
+func (week *Week) Name() string {
+	return fmt.Sprintf("%d Week %d", week.Start.Year(), week.Number)
 }
 
 func AllWeeks(year int) []*Week {

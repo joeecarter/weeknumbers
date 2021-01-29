@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"time"
 
+	ics "github.com/arran4/golang-ical"
+	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 )
 
@@ -35,13 +37,21 @@ func main() {
 	}
 
 	jsonCmd := &cobra.Command{
-		Use:   "json",
+		Use:   "json [year]",
 		Short: "Outputs a json array of week numbers.",
 		Args:  parseYear,
 		RunE:  runJsonCmd,
 	}
 
+	icalCmd := &cobra.Command{
+		Use:   "ical [year]",
+		Short: "Outputs a json array of week numbers.",
+		Args:  parseYear,
+		Run:   runIcalCmd,
+	}
+
 	rootCmd.AddCommand(jsonCmd)
+	rootCmd.AddCommand(icalCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -59,17 +69,18 @@ func runJsonCmd(cmd *cobra.Command, args []string) error {
 	return err
 }
 
-// func main() {
-//
-//
-// 	for number, week := range weeks {
-// 		if week == nil {
-// 			continue
-// 		}
-//
-// 		fmt.Printf("Week %d - %s to %s\n", number, week.Start.Format(time.RFC3339Nano), week.End.Format(time.RFC3339Nano))
-// 	}
-//
-// 	// b, _ := json.MarshalIndent(weeks, "", "\t")
-// 	// fmt.Println(string(b))
-// }
+func runIcalCmd(cmd *cobra.Command, args []string) {
+	weeks := AllWeeks(year)
+
+	cal := ics.NewCalendar()
+	cal.SetMethod(ics.MethodPublish)
+
+	for _, week := range weeks {
+		event := cal.AddEvent(uuid.NewString())
+		event.SetSummary(week.Name())
+		event.SetAllDayStartAt(week.Start)
+		event.SetAllDayEndAt(week.End.Add(1 * Day))
+	}
+
+	fmt.Println(cal.Serialize())
+}
